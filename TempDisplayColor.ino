@@ -1,6 +1,26 @@
 // include the library code:
 #include <LiquidCrystal.h>
 #include <Wire.h>
+
+
+//*** DESCRIPTION OF PIN CONNECTIONS ***\\
+// lcd pin#1 --> ground
+// lcd pin#2 --> Vin (%v or 3.3V)
+// lcd pin #3 --> potentiometer
+// lcd pin#4 --> Arduino digital pin #7
+// lcd pin #5 --> ground
+// lcd pin #6 --> Arduino digital pin #8
+// lcd pin #7 & 8 & 9 & 10 --> empty, no connections
+// lcd pin #11 --> Arduino digital pin #9
+// lcd pin #12 --> Arduino digital pin #10
+// lcd pin #13 --> Arduino digital pin #11
+// lcd pin #14 --> Arduino digital pin #12
+// lcd pin #15 --> Vin (5V or 3.3V)
+// lcd pin #16 --> Arduino digital pin #3
+// lcd pin #17 --> Arduino digital pin #5
+// lcd pin #18 -->   Arduino digital pin #7
+
+
  
 #define REDLITE 3
 #define GREENLITE 5
