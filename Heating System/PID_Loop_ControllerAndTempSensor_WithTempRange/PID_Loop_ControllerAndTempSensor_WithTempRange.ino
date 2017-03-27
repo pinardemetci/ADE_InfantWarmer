@@ -1,5 +1,12 @@
+#include <dht.h>
+
 // Code architecture for PID Loop
 #include <Wire.h>
+dht DHT;
+int sensorPin1 = 2;
+
+#define DHT1_PIN 4
+
 
 //PID Variables
 float current_temperature; // temperature measurement
@@ -19,7 +26,7 @@ float val = 0; // variable to store the read value. Initialize to 0.
 float dutyCycle = 0.0; //Duty Cycle of Bassinet
 
 //Temperature probe setup
-int sensorPin = 1; //the analog pin the TMP36's Vout (sense) pin is connected to
+//int sensorPin = 1; //the analog pin the TMP36's Vout (sense) pin is connected to
                        //the resolution is 10 mV / degree centigrade with a
                        //500 mV offset to allow for negative temperatures
 
@@ -71,22 +78,63 @@ void PID_loop() {
 
 
 int get_temperature() {
-  // Getting the voltage reading form the temperature sensor
-  int reading = analogRead(sensorPin);
-//  Serial.print("reading value: "); Serial.println(reading);
-  // Converting that reading to voltage, for 3.3v arduino use 3.3
-  float voltage = (reading * 5.0)/1024.0; 
+ 
+  // !!!!!!! THIS CODE IS FOR THE DIGITAL SENSOR !!!!!!! \\\\\\\
+  // READ DATA
+  Serial.print("DHT11, \t");
+  int chk = DHT.read11(DHT1_PIN);
+  switch (chk)
+  {
+    case DHTLIB_OK:  
+    Serial.print("OK,\t"); 
+    break;
+    case DHTLIB_ERROR_CHECKSUM: 
+    Serial.print("Checksum error,\t"); 
+    break;
+    case DHTLIB_ERROR_TIMEOUT: 
+    Serial.print("Time out error,\t"); 
+    break;
+    default: 
+    Serial.print("Unknown error,\t"); 
+    break;
+  }
 
-//  //print out the voltage
-//  Serial.print(voltage); Serial.println(" volts");
 
-  // now print out the temperature
-  float temperatureC = (voltage - 0.5) * 100; 
-//  Serial.println(temperatureC); 
+
   
-  Serial.print("temperature: "); Serial.println(temperatureC);
+ // DISPLAY DATA
+//  Serial.print(DHT.humidity,1);
+//  Serial.print(",\t");
+  Serial.println(DHT.temperature,1);
+
   delay(1000);
-  return temperatureC;
+  return DHT.temperature;
+  // END OF CODE FOR DIGITAL SENSOR
+
+
+  
+//  //*** !!!!! THIS CODE IS FOR ANALOG SENSOR !!!! **** \\\\\\
+// //getting the voltage reading from the temperature sensor
+// int reading1 = analogRead(sensorPin1); 
+//  
+// 
+// // converting that reading to voltage, for 3.3v arduino use 3.3
+// float voltage1 = (reading1 * 5.0)/1024.0;
+//
+//
+// 
+// // now print out the temperature
+// float temperature1C = (voltage1 - 0.5) * 100 ; 
+//
+// 
+// Serial.println(temperature1C);
+// // // now convert to Fahrenheit
+//// float temperatureF = (temperatureC * 9.0 / 5.0) + 32.0;
+//// Serial.print(temperatureF); Serial.println(" degrees F");
+// 
+// delay(1000);
+// return temperature1C;
+//// END OF CODE FOR ANALOG  
 }
 
 
