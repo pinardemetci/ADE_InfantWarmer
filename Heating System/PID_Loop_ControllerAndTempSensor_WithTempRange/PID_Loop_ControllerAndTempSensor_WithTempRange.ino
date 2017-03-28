@@ -3,9 +3,9 @@
 // Code architecture for PID Loop
 #include <Wire.h>
 dht DHT;
-int sensorPin1 = 2;
+int sensorPin1 = 2; //if using analog sensor, use analog pin #2
 
-#define DHT1_PIN 4
+#define DHT1_PIN 4 //if using digital sensor, use digital pin #4
 
 
 //PID Variables
