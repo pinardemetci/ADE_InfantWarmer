@@ -18,7 +18,7 @@
 // lcd pin #15 --> Vin (5V or 3.3V)
 // lcd pin #16 --> Arduino digital pin #3
 // lcd pin #17 --> Arduino digital pin #5
-// lcd pin #18 -->   Arduino digital pin #7
+// lcd pin #18 -->   Arduino digital pin #6
 
 
  
