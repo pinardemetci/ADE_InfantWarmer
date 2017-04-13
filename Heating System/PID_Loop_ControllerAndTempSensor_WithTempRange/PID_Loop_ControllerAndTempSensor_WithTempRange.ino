@@ -1,21 +1,31 @@
-#include <dht.h>
+#include <DallasTemperature.h>
 
 // Code architecture for PID Loop
+// Uses waterproof sensor
+
 #include <Wire.h>
+<<<<<<< HEAD
+#include <OneWire.h>
+
+#define ONE_WIRE_BUS 2
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+=======
 dht DHT;
 int sensorPin1 = 2; //if using analog sensor, use analog pin #2
 
 #define DHT1_PIN 4 //if using digital sensor, use digital pin #4
+>>>>>>> 8b8aa8313f28c5026092964ed2b118cbdcc3210f
 
 
 //PID Variables
 float current_temperature; // temperature measurement
-int current_error; //how far form the target temperature we are.
-int target_temperature; //set temperature
-int Pterm; //PropoMrtional term
-int Pgain; //Constant for step response
+float current_error; //how far form the target temperature we are.
+float target_temperature = 30.00; //set temperature
+float Pterm; //PropoMrtional term
+float Pgain = 1.5; //Constant for step response
 float Iterm; // Integral term to overcome steady state error
-float Igain = 0.15; //Constant that can be manipulated - Currently totally random
+float Igain = 0.1; //Constant that can be manipulated - Currently totally random
 int controlSignal; //Sum of Pterm and Iterm
 int allowable_temp_range; // temperature tolerance
 
@@ -36,19 +46,20 @@ void setup() {
   pinMode(bassinetPin, OUTPUT); // Sets the pin at output
   Serial.begin(9600); // open serial port at 100 bps
   setPwmFrequency(6,1); // Bassinet hums out of hearing range http://playground.arduino.cc/Code/PwmFrequency
+  sensors.begin();
 //  allowable_temp_range = 5;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  current_temperature = get_temperature(); //Get current temperature
+  current_temperature = float(get_temperature()); //Get current temperature
   val = analogRead(analogPin)/4.0; //read the input potentiometer pin
   dutyCycle = (val/255.0)*100.0; //Calculate the Duty Cycle
 //  Serial.print("Potentiometer Setting: "); Serial.println(val);
 //  Serial.print("Duty Cycle: "); Serial.println(dutyCycle);  
-  analogWrite(bassinetPin, val);
-  target_temperature = get_target_temperature();
-//  PID_loop(); 
+//  analogWrite(bassinetPin, val);
+//  target_temperature = get_target_temperature();
+  PID_loop(); 
   delay(1000); //wait a second
 
 //  raise_alarm();
@@ -56,91 +67,111 @@ void loop() {
 
 void PID_loop() {
   current_error = target_temperature - current_temperature; //calculate error
+  Serial.print("Current Error: "); Serial.println(current_error);
   Pterm = current_error * Pgain; // Calculate Pterm
+  Serial.print("Pterm: "); Serial.println(Pterm); 
+  
   // make sure that Pterm is valid
   //NOTE: can implement constraints on Pterm to keep it within a range
 
   Iterm = Iterm + current_error*Igain; // Calculate Iterm
+  Serial.print("Iterm: "); Serial.println(Iterm);
   //NOTE: can implement constraints on Iterm to keep it within a range
 
   controlSignal = Pterm + Iterm; //
-  controlSignal = min(controlSignal, 0); //Control Signal must be within the range (0,225)
-  controlSignal = max(controlSignal, 255);
+  if (controlSignal < 0){
+    Iterm = 0;
+    controlSignal = 0; 
+  }
+  if (controlSignal > 255) {
+    Iterm = 0;
+    controlSignal = 255;
+  }
+  Serial.print("Control Singal: "); Serial.println(controlSignal); 
+  analogWrite(bassinetPin, controlSignal);
+  Serial.print("Output PWM: "); Serial.println(controlSignal); 
+}
 
   //Adjust PWM according to control signal
-  if (controlSignal < val/4){
-    analogWrite(bassinetPin, val/4 + controlSignal);
-  }
-  else {
-    analogWrite(bassinetPin, val/4 - controlSignal);
-  }
-}
+//  if (current_error > 0){
+//    analogWrite(bassinetPin, controlSignal);
+//    Serial.print("Output PWM for Heating: "); Serial.println(controlSignal); 
+//  }
+//  else {
+//    analogWrite(bassinetPin, controlSignal);
+//    Serial.print("Output PWM for Cooling: "); Serial.println(controlSignal); 
+//  }
+//  
+//  if (controlSignal < val/4){
+//    
+//    analogWrite(bassinetPin, val/4 + controlSignal);
+//    Serial.print("Output PWM for Heating: "); Serial.println(val/4 + controlSignal); 
+//  }
+//  else {
+//    analogWrite(bassinetPin, val/4 - controlSignal);
+//    Serial.print("Output PWM for Cooling: "); Serial.println(val/4 - controlSignal); 
+//  }
+//}
 
 
 int get_temperature() {
+
+  sensors.requestTemperatures();
+  Serial.print("Temperature is: " );
+  Serial.println(sensors.getTempCByIndex(0));
+  return sensors.getTempCByIndex(0);
  
-  // !!!!!!! THIS CODE IS FOR THE DIGITAL SENSOR !!!!!!! \\\\\\\
-  // READ DATA
-  Serial.print("DHT11, \t");
-  int chk = DHT.read11(DHT1_PIN);
-  switch (chk)
-  {
-    case DHTLIB_OK:  
-    Serial.print("OK,\t"); 
-    break;
-    case DHTLIB_ERROR_CHECKSUM: 
-    Serial.print("Checksum error,\t"); 
-    break;
-    case DHTLIB_ERROR_TIMEOUT: 
-    Serial.print("Time out error,\t"); 
-    break;
-    default: 
-    Serial.print("Unknown error,\t"); 
-    break;
-  }
+// !!!!!!! THIS CODE IS FOR THE DIGITAL SENSOR !!!!!!! \\\\\\\
+// READ DATA
+//Serial.println("DHT11, \t");
+//int chk = DHT.read11(DHT1_PIN);
+//switch (chk)
+//{
+// case DHTLIB_OK:  
+// Serial.println("OK,\t"); 
+// break;
+// case DHTLIB_ERROR_CHECKSUM: 
+// Serial.println("Checksum error,\t"); 
+// break;
+// case DHTLIB_ERROR_TIMEOUT: 
+// Serial.println("Time out error,\t"); 
+// break;
+// default: 
+//Serial.println("Unknown error,\t"); 
+//  break;
+//}
 
 
 
   
- // DISPLAY DATA
+// DISPLAY DATA
 //  Serial.print(DHT.humidity,1);
 //  Serial.print(",\t");
-  Serial.println(DHT.temperature,1);
-
-  delay(1000);
-  return DHT.temperature;
-  // END OF CODE FOR DIGITAL SENSOR
+//  Serial.println(DHT.temperature,1);
+//
+//  delay(1000);
+//  return DHT.temperature;
+// END OF CODE FOR DIGITAL SENSOR
 
 
   
-//  //*** !!!!! THIS CODE IS FOR ANALOG SENSOR !!!! **** \\\\\\
-// //getting the voltage reading from the temperature sensor
-// int reading1 = analogRead(sensorPin1); 
-//  
-// 
-// // converting that reading to voltage, for 3.3v arduino use 3.3
+////*** !!!!! THIS CODE IS FOR ANALOG SENSOR !!!! **** \\\\\\
+////getting the voltage reading from the temperature sensor
+//int reading1 = analogRead(sensorPin1); 
+//// converting that reading to voltage, for 3.3v arduino use 3.3
 // float voltage1 = (reading1 * 5.0)/1024.0;
-//
-//
-// 
-// // now print out the temperature
+//// now print out the temperature
 // float temperature1C = (voltage1 - 0.5) * 100 ; 
-//
-// 
-// Serial.println(temperature1C);
-// // // now convert to Fahrenheit
-//// float temperatureF = (temperatureC * 9.0 / 5.0) + 32.0;
-//// Serial.print(temperatureF); Serial.println(" degrees F");
-// 
+// Serial.print(temperature1C); Serial.println(" degrees C");
 // delay(1000);
 // return temperature1C;
-//// END OF CODE FOR ANALOG  
+// END OF CODE FOR ANALOG  
 }
 
 
 int get_target_temperature() {
   return (9/41)*(val/4);
-}
+  }
 
 //void raise_alarm() {
 ///**
@@ -191,4 +222,3 @@ void setPwmFrequency(int pin, int divisor) {
     TCCR2B = TCCR2B & 0b11111000 | mode;
   }
 }
-
