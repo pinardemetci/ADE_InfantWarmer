@@ -29,6 +29,9 @@
 const int buttonPin[]={4, 13, 0, 1};
 int buttonState=-1;
 float temp = 36.0;
+float bassinetTemp = 35.0;
+float error;
+int increment;
 String State= "NORMAL";
 String lastState="NORMAL";
 String reading="NORMAL";
@@ -81,6 +84,9 @@ lcd.begin(16, 2);
 }
 
 void loop() {
+  error= temp-bassinetTemp;
+  increment=error/0.5;
+  Serial.println(error);
   // put your main code here, to run repeatedly:
    for(int x=0; x<2; x++)
   {
@@ -105,9 +111,11 @@ void loop() {
       delay(400);
       }
 
+   
     }}
+
     lcd.setCursor(0,1);
-    lcd.print(String(35.0, 1));
+    lcd.print(String(bassinetTemp, 1));
     lcd.write(byte(1));
     lcd.print("C");
 
@@ -115,6 +123,154 @@ void loop() {
     lcd.print(String(temp, 1));
     lcd.write(byte(1));
     lcd.print("C");
+
+Serial.println(increment);
+
+for (int i=0; i<=increment*1000; i++){
+    for(int x=0; x<2; x++)
+  {
+    //signifying the state of which the button is in by reading the appropriate pin #
+    buttonState = digitalRead(buttonPin[x]);
+
+    // check if the pushbutton on the keypad is pressed.
+    // if it is, the buttonState is LOW:
+    if (buttonState == LOW && buttonPin[x] == 4) {
+      float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp+0.5;
+      delay(400);
+            }
+      }
+    
+    if (buttonState == LOW && buttonPin[x] == 13) {
+      // turn LED off:
+       float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp-0.5;
+      delay(400);
+      }
+
+   
+    }}
+    lcd.setCursor(0,1);
+    lcd.print(String(bassinetTemp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+
+    lcd.setCursor(10,1);
+    lcd.print(String(temp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+    
+    if ((i%1000==0)& (i!=0)){
+
+      if (error>0.0){
+      bassinetTemp+=0.5;
+     lcd.setCursor(0,1);
+    lcd.print(String(bassinetTemp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+
+        for(int x=0; x<2; x++)
+  {
+    //signifying the state of which the button is in by reading the appropriate pin #
+    buttonState = digitalRead(buttonPin[x]);
+
+    // check if the pushbutton on the keypad is pressed.
+    // if it is, the buttonState is LOW:
+    if (buttonState == LOW && buttonPin[x] == 4) {
+      float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp+0.5;
+      delay(400);
+            }
+      }
+    
+    if (buttonState == LOW && buttonPin[x] == 13) {
+      // turn LED off:
+       float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp-0.5;
+      delay(400);
+      }
+
+   
+    }}
+    lcd.setCursor(0,1);
+    lcd.print(String(bassinetTemp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+
+    lcd.setCursor(10,1);
+    lcd.print(String(temp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+      } else if (error<0.0){
+       bassinetTemp-=0.5;
+     lcd.setCursor(0,1);
+    lcd.print(String(bassinetTemp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+      }
+
+          for(int x=0; x<2; x++)
+  {
+    //signifying the state of which the button is in by reading the appropriate pin #
+    buttonState = digitalRead(buttonPin[x]);
+
+    // check if the pushbutton on the keypad is pressed.
+    // if it is, the buttonState is LOW:
+    if (buttonState == LOW && buttonPin[x] == 4) {
+      float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp+0.5;
+      delay(400);
+            }
+      }
+    
+    if (buttonState == LOW && buttonPin[x] == 13) {
+      // turn LED off:
+       float debouncer = millis();
+      if (debouncer > 1000){          
+      temp=temp-0.5;
+      delay(400);
+      }
+
+   
+    }}
+    lcd.setCursor(0,1);
+    lcd.print(String(bassinetTemp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+
+    lcd.setCursor(10,1);
+    lcd.print(String(temp, 1));
+    lcd.write(byte(1));
+    lcd.print("C");
+
+    
+    }}
+  
+
+
+//for (int i=0; i<=increment; i++){
+//     if (error>0.0){
+//      bassinetTemp= bassinetTemp+(0.5*i);
+//      lcd.setCursor(0,1);
+//    lcd.print(String(bassinetTemp, 1));
+//    lcd.write(byte(1));
+//    lcd.print("C");
+//           
+//    }if( error<0.0){
+//     bassinetTemp= bassinetTemp+(0.5*i);
+//     lcd.setCursor(0,1);
+//    lcd.print(String(bassinetTemp, 1));
+//    lcd.write(byte(1));
+//    lcd.print("C");
+//    }}
+//  
+
+
 
 
     // Currently the backlight color is controlled by the set temperature but we want to change this to bassinet temperature reading
