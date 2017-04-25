@@ -53,6 +53,10 @@ void loop() {
 //  analogWrite(bassinetPin, val);
 //  target_temperature = get_target_temperature();
   PID_loop(); 
+  Serial.print("Target Temp: "); Serial.print(target_temperature);
+  Serial.print("  Current Temp: "); Serial.print(current_temperature);
+  Serial.print("  Error: "); Serial.print(current_error);
+  Serial.print("  Control Sig:  "); Serial.println(controlSignal);
   delay(1000); //wait a second
 
 //  raise_alarm();
@@ -60,15 +64,19 @@ void loop() {
 
 void PID_loop() {
   current_error = target_temperature - current_temperature; //calculate error
-  Serial.print("Current Error: "); Serial.println(current_error);
+  // Serial.print("Target Temp: "); Serial.print(target_temperature);
+  // Serial.print("  Current Temp: "); Serial.print(current_temperature);
+  // Serial.print("  Error: "); Serial.print(current_error);
+  // Serial.print("  Control Sig"); Serial.print(controlSignal);
+  // Serial.pring("  PWM:"); Serial.print(dutyCycle);
   Pterm = current_error * Pgain; // Calculate Pterm
-  Serial.print("Pterm: "); Serial.println(Pterm); 
+  // Serial.print("Pterm: "); Serial.println(Pterm); 
   
   // make sure that Pterm is valid
   //NOTE: can implement constraints on Pterm to keep it within a range
 
   Iterm = Iterm + current_error*Igain; // Calculate Iterm
-  Serial.print("Iterm: "); Serial.println(Iterm);
+  // Serial.print("Iterm: "); Serial.println(Iterm);
   //NOTE: can implement constraints on Iterm to keep it within a range
 
   controlSignal = Pterm + Iterm; //
@@ -80,9 +88,9 @@ void PID_loop() {
     Iterm = 0;
     controlSignal = 255;
   }
-  Serial.print("Control Singal: "); Serial.println(controlSignal); 
+  // Serial.print("Control Singal: "); Serial.println(controlSignal); 
   analogWrite(bassinetPin, controlSignal);
-  Serial.print("Output PWM: "); Serial.println(controlSignal); 
+  // Serial.print("Output PWM: "); Serial.println(controlSignal); 
 }
 
   //Adjust PWM according to control signal
@@ -107,11 +115,11 @@ void PID_loop() {
 //}
 
 
-int get_temperature() {
+float get_temperature() {
 
   sensors.requestTemperatures();
-  Serial.print("Temperature is: " );
-  Serial.println(sensors.getTempCByIndex(0));
+  // Serial.print("Temperature is: " );
+  // Serial.println(sensors.getTempCByIndex(0));
   return sensors.getTempCByIndex(0);
  
 // !!!!!!! THIS CODE IS FOR THE DIGITAL SENSOR !!!!!!! \\\\\\\
