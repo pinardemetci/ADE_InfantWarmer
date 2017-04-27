@@ -1,21 +1,21 @@
-//****** FOR CONTROLING TEMPERATURE DISPLAY WITH UP/DOWN BUTTONS *****\\
+/* THIS CODE IS FOR INTERFACE DEMO. LCD SCREEN IS CONTROLLED BY UP/DOWN AND ON/OFF BUTTONS.
 
-//*** DESCRIPTION OF PIN CONNECTIONS ***\\
-// lcd pin#1 --> ground
-// lcd pin#2 --> Vin (5v or 3.3V)
-// lcd pin #3 --> potentiometer
-// lcd pin#4 --> Arduino digital pin #7 --> MEGA 16
-// lcd pin #5 --> ground
-// lcd pin #6 --> Arduino digital pin #8 --> MEGA 15
-// lcd pin #7 & 8 & 9 & 10 --> empty, no connections
-// lcd pin #11 --> Arduino digital pin #9 ~ --> MEGA 13 ~(not sure if PMW is indeed needed, will test later)
-// lcd pin #12 --> Arduino digital pin #10 ~ --> MEGA  12~ (not sure if PMW is indeed needed, will test later)
-// lcd pin #13 --> Arduino digital pin #11 ~ --> MEGA 11~ (not sure if PMW is indeed needed, will test later)
-// lcd pin #14 --> Arduino digital pin #12 --> MEGA 14
-// lcd pin #15 --> Vin (5V or 3.3V) WHEN USING ON/OFF BUTTON : MEGA 7
-// lcd pin #16 --> Arduino digital pin #3 ~ --> MEGA 10~
-// lcd pin #17 --> Arduino digital pin #5 ~ --> MEGA 9~
-// lcd pin #18 -->   Arduino digital pin #6 ~ --> MEGA 8~
+*** PIN CONNECTIONS FOR LCD SCREEN ***
+LCD pin#1 -->    ground
+LCD pin#2 -->    Vin (5v or 3.3V)
+LCD pin #3 -->   potentiometer
+LCD pin#4 -->    UNO digital pin #7 --> MEGA 16
+LCD pin #5 -->   ground
+LCD pin #6 -->   UNO digital pin #8 --> MEGA 15
+LCD pin #7 & 8 & 9 & 10 --> empty, no connections
+LCD pin #11 -->  UNO digital pin #9 ~ --> MEGA 13 ~(not sure if PMW is indeed needed, will test later)
+LCD pin #12 -->  UNO digital pin #10 ~ --> MEGA  12~ (not sure if PMW is indeed needed, will test later)
+LCD pin #13 -->  UNO digital pin #11 ~ --> MEGA 11~ (not sure if PMW is indeed needed, will test later)
+LCD pin #14 -->  UNO digital pin #12 --> MEGA 14
+LCD pin #15 --> Vin (5V or 3.3V) WHEN USING ON/OFF BUTTON : MEGA 7
+LCD pin #16 --> Arduino digital pin #3 ~ --> MEGA 10~
+LCD pin #17 --> Arduino digital pin #5 ~ --> MEGA 9~
+LCD pin #18 -->   Arduino digital pin #6 ~ --> MEGA 8~
 
 
 /////////FOR UP/DOWN BUTTONS:
@@ -32,6 +32,7 @@
 // HOTALARM: MEGA 6
 // COLDALARM: MEGA 5
 
+*/
 
 
 #include <LiquidCrystal.h>
@@ -104,22 +105,35 @@ lcd.begin(16, 2);
     pinMode(onButtonPin, INPUT_PULLUP);
   
  
-  brightness = 100;
+  brightness = 255;
 }
 
 void loop() {
+
+    while (onState == "OFF"){
+    lcd.setCursor(0,1);
+    lcd.print("       ");
+    digitalWrite(lcdPin, LOW);
+
+    lcd.setCursor(10,1);
+    lcd.print("       ");
+    turnOnOff();
+        }
+
+
+  
     turnOnOff();
     calculateError();
     setTemp();
     changeBacklight();
 
 
-for (int i=0; i<=increment*1000; i++){
+for (int i=0; i<=increment*500; i++){
   turnOnOff();
   setTemp();
   changeBacklight();
     
-    if ((i%1000==0)& (i!=0)){
+    if ((i%500==0)& (i!=0)){
 
       if (error>0.0){
         
@@ -158,7 +172,7 @@ void setTemp(){
 
     // check if the pushbutton on the keypad is pressed.
     // if it is, the buttonState is LOW:
-    if (buttonState == LOW && buttonPin[x] == 17) {
+    if (buttonState == LOW && buttonPin[x] == 17 && temp<40.0) {
       float debouncer = millis();
       if (debouncer > 1000){          
       temp=temp+0.5;
@@ -166,7 +180,7 @@ void setTemp(){
             }
       }
     
-    if (buttonState == LOW && buttonPin[x] == 18) {
+    if (buttonState == LOW && buttonPin[x] == 18 && temp > 28.0) {
       // turn LED off:
        float debouncer = millis();
       if (debouncer > 1000){          
@@ -194,32 +208,33 @@ void writeTemp(){
 }
 
 void changeBacklight(){
-      if (bassinetTemp>37.0){
+      if (bassinetTemp>37.5){
       setBacklight( 255, 0, 0);
+      analogWrite(HOTALARM, 255);
+      analogWrite(COLDALARM, 0);
+      
      }
-    else if (bassinetTemp<36.0){
+    else if (bassinetTemp<35.5){
       setBacklight( 0, 0, 255);
+      analogWrite(HOTALARM, 0);
+      analogWrite(COLDALARM, 255);
   }
     else{
       setBacklight( 0, 255, 0);
-    }
-
-    if (bassinetTemp>39.5){
-      digitalWrite(HOTALARM, HIGH);
-    } else{
-      digitalWrite(HOTALARM, LOW);
-    }
-    
-       if (bassinetTemp<35.5){
-      digitalWrite(COLDALARM, HIGH);
-    } else{
-      digitalWrite(COLDALARM, LOW);
+      analogWrite(COLDALARM, 0);
+      analogWrite(HOTALARM, 0);
     }
 }
     void calculateError(){
       error= temp-bassinetTemp;
        increment=abs(error/0.5);
     }
+
+
+
+
+
+
 
 void changeOperations(){
       turnOnOff();
@@ -253,20 +268,10 @@ void turnOnOff(){
       digitalWrite(lcdPin, HIGH);
       writeTemp(); 
      }else{
-      digitalWrite(lcdPin, LOW); 
+      analogWrite(HOTALARM,0);
+      analogWrite(COLDALARM,0);
+      digitalWrite(lcdPin, LOW);
+      
      }
   
 }
-
-  
-
-
-
-
-
-
-
-
-  
-
-
