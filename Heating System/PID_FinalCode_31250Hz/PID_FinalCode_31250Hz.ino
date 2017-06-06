@@ -25,7 +25,7 @@ void setup() {
   //PWM setup
   pinMode(bassinetPin, OUTPUT); // Sets the digital pin as output
   Serial.begin(9600); // open serial port at 100 bps
-  setPwmFrequency(6,62500); // 1Hz. Bassinet hums out of hearing range @ 62,50 Hz http://playground.arduino.cc/Code/PwmFrequency
+  setPwmFrequency(6,2); // 31,250 Hz. Bassinet hums out of hearing range @ 61,250 Hz http://playground.arduino.cc/Code/PwmFrequency
   sensors.begin();
 }
 
